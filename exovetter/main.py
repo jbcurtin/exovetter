@@ -1,39 +1,67 @@
+"""
+A sketch of an architecture. For discussion
 
-#A sketch of an architecture. For discussion
+Each vetting test is wrapped in a class that follows this
+structure.
+"""
 
-#Each vetting test is wrapped in a class that follows this
-#structure.
+import argparse
+import typing
+
+T = typing.TypeVar('T')
+
+class ExovetterConfig(typing.NamedTuple):
+    input_path: str
+    verbose: str
+
 class Vetter():
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         """kwargs stores the configuration parameters common to all TCEs
         For example, for the Odd-even test, it might specify the signficance
         of the depth difference that causes a TCE to fail
         """
         pass
 
-    def apply(self, tce, lightcurve):
+    def apply(self, tce: 'tce', light_curve: 'light_curve') -> typing.Any:
         """Actually run the test. Returns a dictionary of metric values"""
         pass
 
-    def plot(self, tce, lightcurve):
+    def plot(self: T, tce: 'tce', light_curve: 'light_curve') -> typing.Any:
         """Optional, generate a diagnostic plot"""
         pass
 
 
-#The LPP vetter is an example of a Vetter class.
 class Lpp(Vetter):
-    ...
+    """
+    The LPP vetter is an example of a Vetter class.
+    """
 
-    def apply(self, tce, lightcurve):
-        #Actual implementation of LPP is called here
-        ...
+    def apply(self: T, tce: 'tce', light_curve: 'light_curve') -> typing.Any:
+        """
+        Actual implementation of LPP is called here
+        """
+        pass
 
-#The odd even test. We can have many such tests
 class OddEven(Vetter):
+    """
+    The odd even test. We can have many such tests
+    """
     pass
 
 
-def main(config):
+def capture_options() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description='exovetter utility')
+    parser.add_argument('-v', '--verbose', help='Log details verbosely', default=False, action='store_true', type=bool)
+    parser.add_argument('-i', '--input', help='Input Path?', default=None, type=str)
+    return parser.parse_args()
+
+def build_config(options: argparse.Namespace) -> ExovetterConfig:
+    return ExovetterConfig(options.input, options.verbose)
+
+def main() -> None:
+    options = capture_options()
+    config = build_config(options)
+
     tceTable = pd.read_csv('tcelist.csv')
     sectorList = np.arange(25)
 
